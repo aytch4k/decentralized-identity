@@ -1,0 +1,12 @@
+{
+    "config": {
+      "chainId": 777,
+      "homesteadBlock": 0
+    },
+    "alloc": {
+      "0x47c99e0E3bA62Cc08Dbd98b0Ac4Dc7Fd2d5d98D4": {
+        "balance": "1000000000000000000000"
+      }
+    }
+  }
+  

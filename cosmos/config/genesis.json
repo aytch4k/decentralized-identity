@@ -1,0 +1,27 @@
+{
+    "genesis_time": "2024-12-20T00:00:00Z",
+    "chain_id": "cosmos-did-devnet",
+    "validators": [],
+    "app_state": {
+      "auth": {
+        "accounts": [
+          {
+            "address": "cosmos1w3jhxlap2v2ndu74xk9qvmzgf9qln9j8es6nx0",
+            "coins": [{ "denom": "stake", "amount": "1000000000000" }]
+          }
+        ]
+      },
+      "bank": {
+        "balances": [
+          {
+            "address": "cosmos1w3jhxlap2v2ndu74xk9qvmzgf9qln9j8es6nx0",
+            "coins": [{ "denom": "stake", "amount": "1000000000000" }]
+          }
+        ]
+      },
+      "did": {
+        "dids": []
+      }
+    }
+  }
+  

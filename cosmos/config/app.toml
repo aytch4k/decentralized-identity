@@ -1,0 +1,14 @@
+# This file contains application-specific configuration options.
+
+minimum-gas-prices = "0.01stake"
+pruning = "default"
+index-events = ["message.sender", "tx.hash"]
+
+[api]
+  enable = true
+  swagger = true
+  address = "tcp://0.0.0.0:1317"
+
+[grpc]
+  enable = true
+  address = "0.0.0.0:9090"

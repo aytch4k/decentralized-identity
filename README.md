@@ -95,3 +95,55 @@ Run the following command to start the Cosmos blockchain, Cronos EVM, and API se
 ```
 docker-compose up --build
 ```
+This will:
+
+- Start the Cosmos SDK blockchain on http://localhost:1317 (REST API) and http://localhost:26657 (RPC).
+- Start the Cronos EVM on http://localhost:8545.
+- Launch the REST API server on http://localhost:4000.
+
+## **API Endpoints**
+
+### **DID Operations**
+
+- Create DID
+```
+POST /dids
+Body: {
+  "id": "did:cosmos:123",
+  "publicKey": "abcd1234",
+  "serviceEndpoint": "https://service.endpoint"
+}
+```
+- Query DID
+```
+GET /dids/{id}
+```
+### **Credential Operations**
+
+- Issue Credential
+```
+POST /credentials
+Body: {
+  "id": "cred:123",
+  "issuer": "did:cosmos:issuer",
+  "subject": "did:cosmos:subject",
+  "claim": "verified"
+}
+```
+- Verify Credential
+```
+GET /credentials/{id}
+```
+
+## **Smart Contract Deployment**
+
+1. **Navigate to the cronos/contracts directory:
+```
+cd cronos/contracts
+```
+2. Deploy the DID smart contract on Cronos:
+```
+node deploy.js
+```
+3. Copy the deployed contract address into server.js under the API directory.
+
