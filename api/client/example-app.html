@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sovereign DID Demo</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    h1, h2, h3 {
+      color: #2c3e50;
+    }
+    
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .card {
+      flex: 1;
+      min-width: 300px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px 0;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    button:disabled {
+      background-color: #95a5a6;
+      cursor: not-allowed;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .result {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin-top: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Sovereign Decentralized Identity Demo</h1>
+  
+  <div class="container">
+    <div class="card">
+      <h2>Wallet Connection</h2>
+      <p>Connect your wallet to create or manage your Decentralized Identity (DID).</p>
+      
+      <button id="connect-wallet">Connect Wallet</button>
+      <button id="disconnect-wallet" disabled>Disconnect</button>
+      
+      <div id="wallet-info" style="display: none;">
+        <h3>Wallet Information</h3>
+        <p><strong>Address:</strong> <span id="wallet-address"></span></p>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>Decentralized Identity (DID)</h2>
+      <p>Create or manage your Sovereign DID.</p>
+      
+      <div id="create-did-form">
+        <h3>Create New DID</h3>
+        
+        <label for="region">Region:</label>
+        <select id="region">
+          <option value="EU">European Union</option>
+          <option value="US">United States</option>
+        </select>
+        
+        <button id="create-did" disabled>Create DID</button>
+      </div>
+      
+      <div id="did-info" style="display: none;">
+        <h3>DID Information</h3>
+        <p><strong>DID:</strong> <span id="did-value"></span></p>
+        <p><strong>Region:</strong> <span id="did-region"></span></p>
+        
+        <button id="resolve-did">Resolve DID</button>
+        
+        <div id="did-result" class="result" style="display: none;"></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <h2>Single Sign-On</h2>
+      <p>Use your DID to authenticate across multiple applications.</p>
+      
+      <button id="sso-login" disabled>Login with DID</button>
+      <button id="sso-logout" disabled>Logout</button>
+      
+      <div id="sso-info" style="display: none;">
+        <h3>SSO Session</h3>
+        <p><strong>Token:</strong> <span id="sso-token"></span></p>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h2>App Integration</h2>
+      <p>Access your applications using SSO.</p>
+      
+      <div id="apps-container">
+        <div class="app-card">
+          <h3>App 1 (OAuth)</h3>
+          <button class="app-login" data-app="app1" disabled>Login to App 1</button>
+          <div class="app-result"></div>
+        </div>
+        
+        <div class="app-card">
+          <h3>App 2 (Basic Auth)</h3>
+          <button class="app-login" data-app="app2" disabled>Login to App 2</button>
+          <div class="app-result"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Load libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.9.0/dist/web3.min.js"></script>
+  <script src="sovereign-did-client.js"></script>
+  <script src="homomorphic-encryption.js"></script>
+  
+  <script>
+    // Global variables
+    let didClient;
+    let heKeyPair;
+    
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Initialize DID client if Web3 is available
+      if (window.ethereum) {
+        didClient = new SovereignDIDClient({
+          apiUrl: 'http://localhost:4000',
+          web3Provider: window.ethereum
+        });
+        
+        try {
+          await didClient.initialize();
+          updateWalletUI();
+        } catch (error) {
+          console.error('Error initializing DID client:', error);
+        }
+      } else {
+        alert('Web3 provider not found. Please install MetaMask or another Web3 wallet.');
+      }
+      
+      // Set up event listeners
+      setupEventListeners();
+    });
+    
+    // Set up event listeners for all interactive elements
+    function setupEventListeners() {
+      document.getElementById('connect-wallet').addEventListener('click', connectWallet);
+      document.getElementById('disconnect-wallet').addEventListener('click', disconnectWallet);
+      document.getElementById('create-did').addEventListener('click', createDID);
+      document.getElementById('resolve-did').addEventListener('click', resolveDID);
+      document.getElementById('sso-login').addEventListener('click', ssoLogin);
+      document.getElementById('sso-logout').addEventListener('click', ssoLogout);
+      
+      // App login buttons
+      document.querySelectorAll('.app-login').forEach(button => {
+        button.addEventListener('click', () => loginToApp(button.dataset.app));
+      });
+    }
+    
+    // Update UI based on wallet connection status
+    function updateWalletUI() {
+      const isConnected = didClient && didClient.walletAddress;
+      const connectBtn = document.getElementById('connect-wallet');
+      const disconnectBtn = document.getElementById('disconnect-wallet');
+      const walletInfo = document.getElementById('wallet-info');
+      const createDidBtn = document.getElementById('create-did');
+      const ssoLoginBtn = document.getElementById('sso-login');
+      
+      if (isConnected) {
+        connectBtn.disabled = true;
+        disconnectBtn.disabled = false;
+        walletInfo.style.display = 'block';
+        
+        document.getElementById('wallet-address').textContent = didClient.walletAddress;
+        
+        createDidBtn.disabled = false;
+        ssoLoginBtn.disabled = false;
+        
+        // Check if DID exists
+        checkDIDExists();
+      } else {
+        connectBtn.disabled = false;
+        disconnectBtn.disabled = true;
+        walletInfo.style.display = 'none';
+        
+        createDidBtn.disabled = true;
+        ssoLoginBtn.disabled = true;
+      }
+    }
+    
+    // Check if DID exists for the connected wallet
+    async function checkDIDExists() {
+      try {
+        if (!didClient || !didClient.did) return;
+        
+        const didInfo = await didClient.resolveDID();
+        
+        const didInfoElement = document.getElementById('did-info');
+        const createDidForm = document.getElementById('create-did-form');
+        
+        if (didInfo && didInfo.isActive) {
+          didInfoElement.style.display = 'block';
+          createDidForm.style.display = 'none';
+          
+          document.getElementById('did-value').textContent = didInfo.did;
+          document.getElementById('did-region').textContent = didInfo.region;
+        } else {
+          didInfoElement.style.display = 'none';
+          createDidForm.style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error checking DID:', error);
+        
+        document.getElementById('did-info').style.display = 'none';
+        document.getElementById('create-did-form').style.display = 'block';
+      }
+    }
+    
+    // Connect wallet
+    async function connectWallet() {
+      try {
+        await didClient.connectWallet();
+        updateWalletUI();
+      } catch (error) {
+        console.error('Error connecting wallet:', error);
+        alert('Failed to connect wallet: ' + error.message);
+      }
+    }
+    
+    // Disconnect wallet
+    function disconnectWallet() {
+      didClient.walletAddress = null;
+      didClient.did = null;
+      didClient.ssoToken = null;
+      updateWalletUI();
+      
+      document.getElementById('sso-info').style.display = 'none';
+      document.getElementById('sso-login').disabled = true;
+      document.getElementById('sso-logout').disabled = true;
+      
+      // Disable app login buttons
+      document.querySelectorAll('.app-login').forEach(button => {
+        button.disabled = true;
+      });
+    }
+    
+    // Create DID
+    async function createDID() {
+      try {
+        const region = document.getElementById('region').value;
+        
+        // Generate a key pair for homomorphic encryption
+        heKeyPair = HomomorphicEncryption.generateKeyPair(didClient.walletAddress);
+        
+        // Create initial vault data
+        const vaultData = {
+          vaultSpec: "SovereignDiD-Vault-v1.0",
+          vaultId: `vault-${Date.now()}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          region: region,
+          encryption: {
+            scheme: "HE",
+            algorithm: "TFHE",
+            publicKey: heKeyPair.publicKey
+          },
+          contents: []
+        };
+        
+        // Create DID Document
+        const didDocument = {
+          "@context": "https://www.w3.org/ns/did/v1",
+          id: `did:sovereign:${didClient.walletAddress}`,
+          controller: didClient.walletAddress,
+          verificationMethod: [{
+            id: `did:sovereign:${didClient.walletAddress}#keys-1`,
+            type: "EcdsaSecp256k1VerificationKey2019",
+            controller: `did:sovereign:${didClient.walletAddress}`,
+            publicKeyHex: didClient.walletAddress
+          }],
+          authentication: [
+            `did:sovereign:${didClient.walletAddress}#keys-1`
+          ],
+          service: [{
+            id: `did:sovereign:${didClient.walletAddress}#sso`,
+            type: "SSOService",
+            serviceEndpoint: "http://localhost:4000/api/sso"
+          }]
+        };
+        
+        // Create DID
+        const result = await didClient.createDID({
+          region,
+          didDocument,
+          vaultData
+        });
+        
+        alert(`DID created successfully: ${result.did}`);
+        checkDIDExists();
+      } catch (error) {
+        console.error('Error creating DID:', error);
+        alert('Failed to create DID: ' + error.message);
+      }
+    }
+    
+    // Resolve DID
+    async function resolveDID() {
+      try {
+        const result = await didClient.resolveDID();
+        document.getElementById('did-result').textContent = JSON.stringify(result, null, 2);
+        document.getElementById('did-result').style.display = 'block';
+      } catch (error) {
+        console.error('Error resolving DID:', error);
+        alert('Failed to resolve DID: ' + error.message);
+      }
+    }
+    
+    // SSO Login
+    async function ssoLogin() {
+      try {
+        const result = await didClient.login();
+        
+        document.getElementById('sso-token').textContent = result.token.substring(0, 20) + '...';
+        document.getElementById('sso-info').style.display = 'block';
+        document.getElementById('sso-login').disabled = true;
+        document.getElementById('sso-logout').disabled = false;
+        
+        // Enable app login buttons
+        document.querySelectorAll('.app-login').forEach(button => {
+          button.disabled = false;
+        });
+      } catch (error) {
+        console.error('Error logging in:', error);
+        alert('Failed to login: ' + error.message);
+      }
+    }
+    
+    // SSO Logout
+    async function ssoLogout() {
+      try {
+        await didClient.logout();
+        
+        document.getElementById('sso-info').style.display = 'none';
+        document.getElementById('sso-login').disabled = false;
+        document.getElementById('sso-logout').disabled = true;
+        
+        // Disable app login buttons
+        document.querySelectorAll('.app-login').forEach(button => {
+          button.disabled = true;
+        });
+      } catch (error) {
+        console.error('Error logging out:', error);
+        alert('Failed to logout: ' + error.message);
+      }
+    }
+    
+    // Login to app
+    async function loginToApp(appId) {
+      try {
+        const result = await didClient.getAppToken(appId);
+        
+        // Display result
+        const appResult = document.querySelector(`.app-login[data-app="${appId}"]`).nextElementSibling;
+        appResult.textContent = `Logged in successfully. Token: ${result.token.substring(0, 10)}...`;
+        appResult.style.display = 'block';
+      } catch (error) {
+        console.error(`Error logging in to app ${appId}:`, error);
+        alert(`Failed to login to app ${appId}: ${error.message}`);
+      }
+    }
+  </script>
+</body>
+</html>

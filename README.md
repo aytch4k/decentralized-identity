@@ -1,149 +1,175 @@
-# **Decentralized Identity (DID) Solution on Cosmos SDK and Cronos**
+# Sovereign Decentralized Identity (DiD) Management Solution
 
-This project is a hybrid Decentralized Identity (DID) solution built on **Cosmos SDK** (Layer 1 blockchain) and **Cronos EVM** (smart contract platform). It enables DID creation, Verifiable Credential (VC) issuance, and verification with a one-click launch for a development environment.
+This project implements an enterprise-grade decentralized identity management solution with Single Sign-On (SSO) capabilities. It allows users to control their identity information through blockchain technology while providing seamless authentication across multiple applications.
 
----
+## Features
 
-## **Features**
+- **Decentralized Identity (DiD)**: Create and manage W3C-compliant Decentralized Identifiers
+- **Secure Vault**: Store encrypted credentials, PII, PHI, and PCI data
+- **Single Sign-On (SSO)**: Authenticate across multiple applications with different auth mechanisms
+- **Advanced Cryptography**:
+  - Homomorphic Encryption (HE) for data privacy
+  - Zero-Knowledge Proofs (ZK-SNARKs) for credential verification
+  - Differential Privacy for data analytics
+- **Data Sovereignty**: Region-specific data storage with geo-fencing
+- **Compliance**: GDPR, HIPAA, and PCI DSS compliant design
+- **Blockchain Integration**: Smart contracts for DiD registry and verification
+- **NFT-Based Identity**: DiD and Export NFTs for identity ownership and data sharing
 
-- **Cosmos SDK Layer**:
-  - Dedicated Layer 1 blockchain for managing DIDs.
-  - DID creation, querying, and management using Cosmos SDK modules.
-  - Interoperability using IBC (Inter-Blockchain Communication Protocol).
+## Architecture
 
-- **Cronos EVM Layer**:
-  - EVM-compatible smart contracts for managing Verifiable Credentials.
-  - Supports Ethereum-based tools and integrations.
+The system consists of the following components:
 
-- **Unified API Layer**:
-  - RESTful APIs for interacting with the Cosmos blockchain and Cronos smart contracts.
-  - Simplified API interface for developers.
+1. **Blockchain Layer**:
+   - Cronos blockchain for DiD registry smart contracts
+   - SovereignIdentityManager contract for DiD and vault management
 
-- **One-Click Devnet**:
-  - Dockerized setup for launching the entire solution locally with Docker Compose.
-
----
-
-## **Architecture**
-
-### **Components**
-
-1. **Cosmos SDK Blockchain**:
-   - Handles DID creation, storage, and querying.
-   - Uses Cosmos SDK modules for DID management.
-
-2. **Cronos Smart Contracts**:
-   - Manages Verifiable Credentials.
-   - Ensures compatibility with Ethereum-based ecosystems.
+2. **Storage Layer**:
+   - IPFS for decentralized, encrypted storage of vault data
+   - Geo-fenced nodes for regional data sovereignty
 
 3. **API Layer**:
-   - A Node.js-based REST API server that interacts with both Cosmos and Cronos.
-   - Provides endpoints for DID and credential operations.
+   - DiD Manager API for DiD operations
+   - SSO Integration Layer for authentication across apps
+   - RESTful endpoints for client interactions
 
-4. **Interoperability**:
-   - Data exchange between Cosmos SDK and Cronos using IBC.
+4. **Client Layer**:
+   - JavaScript libraries for DiD, HE, ZK, and DP operations
+   - Example web application for demonstration
 
----
+## Prerequisites
 
-## **Project Structure**
+- Node.js (v14+)
+- Docker and Docker Compose
+- Web3 wallet (e.g., MetaMask)
 
-```plaintext
-did-solution/
-│
-├── cosmos/
-│   ├── Dockerfile
-│   ├── config/              # Cosmos SDK blockchain configuration
-│   └── app/                 # Cosmos SDK app logic
-│       ├── main.go
-│       └── modules/
-│           └── did/         # DID module logic
-│
-├── cronos/
-│   ├── Dockerfile
-│   ├── contracts/           # EVM smart contracts
-│       ├── DIDRegistry.sol
-│       └── deploy.js
-│   └── config/              # Cronos chain configuration
-│
-├── api/
-│   ├── Dockerfile
-│   ├── server.js            # REST API logic
-│   └── package.json
-│
-└── docker-compose.yml       # Docker Compose file for one-click devnet
+## Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/decentralized-identity.git
+   cd decentralized-identity
+   ```
+
+2. Start the services using Docker Compose:
+   ```
+   docker-compose up -d
+   ```
+
+3. Deploy the smart contracts:
+   ```
+   cd cronos/contracts
+   npm install
+   node deploy-sovereign.js
+   ```
+
+4. Update the contract address in the API configuration:
+   - Copy the deployed contract address from the previous step
+   - Update the `CONTRACT_ADDRESS` environment variable in `docker-compose.yml`
+
+5. Restart the API service:
+   ```
+   docker-compose restart api
+   ```
+
+## Usage
+
+### Web Demo
+
+1. Open the example application in your browser:
+   ```
+   open http://localhost:4000/client/example-app.html
+   ```
+
+2. Connect your Web3 wallet (e.g., MetaMask)
+
+3. Create a DiD and explore the features:
+   - Create and manage your Decentralized Identity
+   - Store and retrieve credentials in the Secure Vault
+   - Use SSO to authenticate across multiple applications
+   - Experiment with HE, ZK proofs, and differential privacy
+
+### API Endpoints
+
+The API server exposes the following endpoints:
+
+#### DiD Manager API
+
+- `POST /api/did/create` - Create a new DiD
+- `GET /api/did/resolve/:did` - Resolve a DiD to its DiD Document
+- `PUT /api/did/update` - Update a DiD Document
+- `DELETE /api/did/deactivate/:walletAddress` - Deactivate a DiD
+- `POST /api/did/verify` - Verify a DiD proof
+- `POST /api/did/credentials/add` - Add app credentials to a DiD Document
+- `GET /api/did/credentials/:did/:appId` - Get app credentials
+- `POST /api/did/export` - Authorize export of DiD data
+
+#### SSO Integration Layer API
+
+- `GET /api/sso/challenge/:walletAddress` - Generate a challenge for wallet authentication
+- `POST /api/sso/login` - Authenticate with wallet and get SSO token
+- `GET /api/sso/token/:appId` - Get app-specific authentication token
+- `POST /api/sso/logout` - Invalidate SSO session
+
+## Client Libraries
+
+The project includes several client-side libraries:
+
+- `sovereign-did-client.js` - Main client for DiD and SSO operations
+- `homomorphic-encryption.js` - Utilities for homomorphic encryption
+- `zk-proofs.js` - Utilities for zero-knowledge proofs
+- `differential-privacy.js` - Utilities for differential privacy
+
+## Project Structure
+
 ```
----
-
-## **Quick Start**
-
-### **Prerequisites**
-
-Ensure the following are installed:
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
-- [Node.js](https://nodejs.org/) (for local contract testing)
-
-### **Clone the Repository**
-
-```bash
-git clone https://github.com/aytch4k/decentralized-identity.git
-cd did-solution
+decentralized-identity/
+├── api/                  # API server
+│   ├── client/           # Client-side libraries and demo
+│   ├── did-manager.js    # DiD Manager implementation
+│   ├── sso-service.js    # SSO Service implementation
+│   ├── server.js         # API server implementation
+│   ├── package.json      # API dependencies
+│   └── Dockerfile        # API Docker configuration
+├── cosmos/               # Cosmos blockchain app
+│   ├── app/              # Cosmos SDK application
+│   │   ├── main.go       # Main application entry point
+│   │   └── modules/      # Custom modules
+│   │       └── did/      # DiD module implementation
+│   ├── config/           # Cosmos configuration
+│   └── Dockerfile        # Cosmos Docker configuration
+├── cronos/               # Cronos blockchain
+│   ├── contracts/        # Smart contracts
+│   │   ├── DIDRegistry.sol              # Basic DiD registry
+│   │   ├── SovereignIdentityManager.sol # Enhanced DiD manager
+│   │   └── deploy-sovereign.js          # Deployment script
+│   ├── config/           # Cronos configuration
+│   └── Dockerfile        # Cronos Docker configuration
+├── docs/                 # Documentation
+│   ├── DID_LowLevelDesign.md            # DiD system design
+│   ├── SECURE_VAULT_EXTENSION.md        # Secure vault extension
+│   ├── Secure_Vault_Spec.md             # Secure vault specification
+│   ├── Sovereign DiD Standard Specification for NFT Data.md # NFT-based DiD spec
+│   └── Zero-Knowledge Proofs_HE-DiffPriv.md # Cryptography details
+├── docker-compose.yml    # Docker Compose configuration
+└── README.md             # Project documentation
 ```
 
-### **Launch the devnet**
-Run the following command to start the Cosmos blockchain, Cronos EVM, and API server:
-```
-docker-compose up --build
-```
-This will:
+## Security Considerations
 
-- Start the Cosmos SDK blockchain on http://localhost:1317 (REST API) and http://localhost:26657 (RPC).
-- Start the Cronos EVM on http://localhost:8545.
-- Launch the REST API server on http://localhost:4000.
+- Private keys never leave the user's wallet
+- All credential data is encrypted using homomorphic encryption
+- Zero-knowledge proofs are used for credential verification without revealing actual data
+- Differential privacy techniques are applied to sensitive data
+- All API endpoints require proper authentication
+- Geo-fenced storage ensures data sovereignty compliance
 
-## **API Endpoints**
+## License
 
-### **DID Operations**
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-- Create DID
-```
-POST /dids
-Body: {
-  "id": "did:cosmos:123",
-  "publicKey": "abcd1234",
-  "serviceEndpoint": "https://service.endpoint"
-}
-```
-- Query DID
-```
-GET /dids/{id}
-```
-### **Credential Operations**
+## Acknowledgments
 
-- Issue Credential
-```
-POST /credentials
-Body: {
-  "id": "cred:123",
-  "issuer": "did:cosmos:issuer",
-  "subject": "did:cosmos:subject",
-  "claim": "verified"
-}
-```
-- Verify Credential
-```
-GET /credentials/{id}
-```
-
-## **Smart Contract Deployment**
-
-1. **Navigate to the cronos/contracts directory:
-```
-cd cronos/contracts
-```
-2. Deploy the DID smart contract on Cronos:
-```
-node deploy.js
-```
-3. Copy the deployed contract address into server.js under the API directory.
-
+- W3C Decentralized Identifiers (DiD) Working Group
+- OpenZeppelin for smart contract libraries
+- IPFS for decentralized storage

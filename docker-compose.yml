@@ -1,0 +1,64 @@
+version: '3.8'
+services:
+  cosmos:
+    build:
+      context: ./cosmos
+    ports:
+      - "26657:26657"
+      - "1317:1317"
+    volumes:
+      - cosmos-data:/root/.cosmosd
+    command: cosmosd start
+    networks:
+      - did-network
+
+  cronos:
+    build:
+      context: ./cronos
+    ports:
+      - "8545:8545"
+      - "8546:8546"
+    volumes:
+      - cronos-data:/root/.cronos
+    command: cronosd start
+    networks:
+      - did-network
+
+  ipfs:
+    image: ipfs/kubo:latest
+    ports:
+      - "5001:5001"
+      - "8080:8080"
+    volumes:
+      - ipfs-data:/data/ipfs
+    networks:
+      - did-network
+
+  api:
+    build:
+      context: ./api
+    ports:
+      - "4000:4000"
+    depends_on:
+      - cosmos
+      - cronos
+      - ipfs
+    environment:
+      - COSMOS_API=http://cosmos:1317
+      - CRONOS_RPC=http://cronos:8545
+      - IPFS_API=http://ipfs:5001
+      - JWT_SECRET=your-jwt-secret-key-change-in-production
+      - PORT=4000
+    volumes:
+      - ./api/client:/app/client
+    networks:
+      - did-network
+
+networks:
+  did-network:
+    driver: bridge
+
+volumes:
+  cosmos-data:
+  cronos-data:
+  ipfs-data:
