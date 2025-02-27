@@ -4,7 +4,8 @@ const crypto = require('crypto');
 const { createHash } = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const IPFS = require('ipfs-http-client');
+// Fix for ipfs-http-client compatibility issue
+const { create } = require('ipfs-http-client');
 
 // Configuration
 const config = {
@@ -29,7 +30,7 @@ const contractABI = JSON.parse(fs.readFileSync(path.join(__dirname, 'SovereignId
 const contract = new web3.eth.Contract(contractABI, config.contractAddress);
 
 // Initialize IPFS client
-const ipfs = IPFS.create({ url: config.ipfsApi });
+const ipfs = create({ url: config.ipfsApi });
 
 /**
  * DID Manager class for handling DID operations

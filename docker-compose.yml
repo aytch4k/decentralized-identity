@@ -8,7 +8,7 @@ services:
       - "1317:1317"
     volumes:
       - cosmos-data:/root/.cosmosd
-    command: cosmosd start
+    # Using the CMD from Dockerfile
     networks:
       - did-network
 
@@ -20,7 +20,7 @@ services:
       - "8546:8546"
     volumes:
       - cronos-data:/root/.cronos
-    command: cronosd start
+    # Using the CMD from Dockerfile
     networks:
       - did-network
 
@@ -65,7 +65,7 @@ services:
   ipfs-eu-1:
     image: ipfs/kubo:latest
     ports:
-      - "5001:5001"
+      - "5011:5001"  # Changed from 5001:5001 to avoid port conflict
       - "4001:4001"
     volumes:
       - ipfs-eu-1-data:/data/ipfs
