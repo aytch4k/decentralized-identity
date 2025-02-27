@@ -47,18 +47,15 @@ services:
       - ipfs-eu-2
       - ipfs-us-1
       - ipfs-us-2
+    env_file:
+      - ./api/.env
     environment:
       - COSMOS_API=http://cosmos:1317
       - CRONOS_RPC=http://cronos:8545
       - IPFS_API=http://ipfs:5001
-      - JWT_SECRET=your-jwt-secret-key-change-in-production
-      - PORT=4000
-      - REGION=EU
-      - BOOTSTRAP_LIST=/ip4/ipfs-eu-1/tcp/4001/p2p/QmEU1,/ip4/ipfs-eu-2/tcp/4001/p2p/QmEU2,/ip4/ipfs-us-1/tcp/4001/p2p/QmUS1,/ip4/ipfs-us-2/tcp/4001/p2p/QmUS2
-      - EU_MIDDLEWARE_PEER_ID=12D3KooWE5b3VqbmaKj7D4u5R9wygV3z9uNT7UUFvmWA6QTy7x1A
-      - US_MIDDLEWARE_PEER_ID=12D3KooWF6b3VqbmaKj7D4u5R9wygV3z9uNT7UUFvmWA6QTy7x1B
     volumes:
       - ./api/client:/app/client
+      - ./api/.env:/app/.env
     networks:
       - did-network
 

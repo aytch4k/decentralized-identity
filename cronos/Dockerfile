@@ -11,9 +11,14 @@ COPY ./config/hardhat.config.js .
 RUN apk add --no-cache nodejs npm bash
 
 # Install required dependencies
-RUN npm init -y && npm install --save web3 @openzeppelin/contracts hardhat @nomiclabs/hardhat-ethers
+RUN npm init -y && npm install --save web3 @openzeppelin/contracts hardhat @nomiclabs/hardhat-ethers dotenv
 # Skip interactive init and use the provided config
 RUN npx hardhat compile
+
+# Create build directory for compiled contracts
+RUN mkdir -p /contracts/build
+# Copy deployment script
+COPY ./deploy-to-autheo.js .
 
 # Find where geth is located and create a simple startup script
 RUN which geth || echo "geth not found in PATH" && \

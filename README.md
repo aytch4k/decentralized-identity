@@ -51,6 +51,8 @@ The system consists of the following components:
 
 ## Installation
 
+### Local Development Setup
+
 1. Clone the repository:
    ```
    git clone https://github.com/yourusername/decentralized-identity.git
@@ -77,6 +79,31 @@ The system consists of the following components:
    ```
    docker-compose restart api
    ```
+
+### Autheo Testnet Setup
+
+For deploying to the Autheo testnet, follow these steps:
+
+1. Generate a wallet for Autheo testnet:
+   ```
+   ./generate-wallet.js --update-env
+   ```
+
+2. Configure your environment:
+   - Edit the `.env` file in the `api` directory with your Autheo testnet information
+   - Make sure to update the RPC and API endpoints for Autheo
+
+3. Deploy the smart contracts to Autheo testnet:
+   ```
+   docker-compose run --rm cronos node /contracts/deploy-to-autheo.js
+   ```
+
+4. Start the services:
+   ```
+   docker-compose up -d
+   ```
+
+For detailed instructions, see [README-AUTHEO.md](README-AUTHEO.md).
 
 ## Usage
 
@@ -146,6 +173,7 @@ decentralized-identity/
 │   ├── sso-service.js    # SSO Service implementation
 │   ├── server.js         # API server implementation
 │   ├── package.json      # API dependencies
+│   ├── .env              # Environment configuration
 │   └── Dockerfile        # API Docker configuration
 ├── cosmos/               # Cosmos blockchain app
 │   ├── app/              # Cosmos SDK application
@@ -160,6 +188,7 @@ decentralized-identity/
 │   │   ├── SovereignIdentityManager.sol # Enhanced DiD manager
 │   │   └── deploy-sovereign.js          # Deployment script
 │   ├── config/           # Cronos configuration
+│   ├── deploy-to-autheo.js # Autheo testnet deployment script
 │   └── Dockerfile        # Cronos Docker configuration
 ├── docs/                 # Documentation
 │   ├── DID_LowLevelDesign.md            # DiD system design
@@ -168,6 +197,8 @@ decentralized-identity/
 │   ├── Sovereign DiD Standard Specification for NFT Data.md # NFT-based DiD spec
 │   └── Zero-Knowledge Proofs_HE-DiffPriv.md # Cryptography details
 ├── docker-compose.yml    # Docker Compose configuration
+├── generate-wallet.js    # Wallet generator for Autheo testnet
+├── README-AUTHEO.md      # Autheo testnet setup guide
 └── README.md             # Project documentation
 ```
 
@@ -191,3 +222,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - W3C Decentralized Identifiers (DiD) Working Group
 - OpenZeppelin for smart contract libraries
 - IPFS for decentralized storage
+

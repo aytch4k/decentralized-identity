@@ -13,7 +13,7 @@ const config = {
   cosmosApi: process.env.COSMOS_API || 'http://cosmos:1317',
   ipfsApi: process.env.IPFS_API || 'http://ipfs:5001',
   contractAddress: process.env.CONTRACT_ADDRESS || '0x5FbDB2315678afecb367f032d93F642f64180aa3',
-  privateKey: process.env.PRIVATE_KEY || '0x0000000000000000000000000000000000000000000000000000000000000000',
+  privateKey: process.env.PRIVATE_KEY || '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80', // Default dev private key
   ipfsRegions: {
     'EU': ['ipfs-eu-1:5001', 'ipfs-eu-2:5001'],
     'US': ['ipfs-us-1:5001', 'ipfs-us-2:5001']
