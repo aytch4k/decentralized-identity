@@ -59,22 +59,33 @@ class SSOService {
    * @param {string} params.walletAddress - User's wallet address
    * @param {string} params.signature - Signature of the challenge
    * @param {string} params.challenge - Challenge string
+   * @param {boolean} params.tunnelAuthenticated - Whether authenticated via secure tunnel
+   * @param {string} params.sessionId - Secure tunnel session ID
    * @returns {Promise<Object>} Authentication result with SSO token
    */
   async login(params) {
     try {
-      const { walletAddress, signature, challenge } = params;
+      const { walletAddress, signature, challenge, tunnelAuthenticated, sessionId } = params;
       
-      // 1. Verify the signature
+      // 1. Verify authentication
+      let isValid = false;
       const did = `did:sovereign:${walletAddress}`;
-      const isValid = await didManager.verifyDIDProof({
-        did,
-        challenge,
-        signature
-      });
+      
+      if (tunnelAuthenticated && sessionId) {
+        // If authenticated via secure tunnel, trust the tunnel session
+        console.log(`User ${walletAddress} authenticated via secure tunnel session ${sessionId}`);
+        isValid = true;
+      } else {
+        // Otherwise, verify the signature
+        isValid = await didManager.verifyDIDProof({
+          did,
+          challenge,
+          signature
+        });
+      }
       
       if (!isValid) {
-        throw new Error('Invalid signature');
+        throw new Error('Invalid authentication');
       }
       
       // 2. Resolve the DID to get identity information

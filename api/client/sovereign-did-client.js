@@ -8,6 +8,8 @@ class SovereignDIDClient {
    * @param {Object} config - Configuration options
    * @param {string} config.apiUrl - URL of the DID API server
    * @param {Object} config.web3Provider - Web3 provider instance (e.g., window.ethereum)
+   * @param {boolean} config.useSecureTunnel - Whether to use secure tunnel for communication
+   * @param {string} config.region - Region for data sovereignty (e.g., 'EU', 'US')
    */
   constructor(config) {
     this.apiUrl = config.apiUrl || 'http://localhost:4000';
@@ -16,6 +18,9 @@ class SovereignDIDClient {
     this.ssoToken = null;
     this.walletAddress = null;
     this.did = null;
+    this.useSecureTunnel = config.useSecureTunnel || false;
+    this.region = config.region || 'EU';
+    this.secureTunnel = null;
   }
 
   /**
@@ -35,6 +40,31 @@ class SovereignDIDClient {
     if (accounts.length > 0) {
       this.walletAddress = accounts[0];
       this.did = `did:sovereign:${this.walletAddress}`;
+    }
+    
+    // Initialize secure tunnel if enabled
+    if (this.useSecureTunnel) {
+      try {
+        // Load the secure tunnel client
+        if (typeof SecureTunnelClient === 'undefined') {
+          console.warn('SecureTunnelClient not found, loading from API server');
+          await this._loadScript(`${this.apiUrl}/client/secure-tunnel-client.js`);
+        }
+        
+        // Create and initialize the secure tunnel
+        this.secureTunnel = new SecureTunnelClient({
+          apiUrl: this.apiUrl,
+          web3Provider: this.web3Provider
+        });
+        
+        // Initialize the tunnel with the selected region
+        await this.secureTunnel.initialize(this.region);
+        console.log('Secure tunnel initialized');
+      } catch (error) {
+        console.error('Failed to initialize secure tunnel:', error);
+        // Fall back to regular API communication
+        this.useSecureTunnel = false;
+      }
     }
   }
 
@@ -69,30 +99,43 @@ class SovereignDIDClient {
         await this.connectWallet();
       }
       
-      // 1. Get challenge
-      const challengeResponse = await fetch(`${this.apiUrl}/api/sso/challenge/${this.walletAddress}`);
-      const { challenge } = await challengeResponse.json();
+      let loginResult;
       
-      // 2. Sign challenge
-      const signature = await this.signMessage(challenge);
-      
-      // 3. Login with signature
-      const loginResponse = await fetch(`${this.apiUrl}/api/sso/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          walletAddress: this.walletAddress,
-          signature,
-          challenge
-        })
-      });
-      
-      const loginResult = await loginResponse.json();
-      
-      if (!loginResponse.ok) {
-        throw new Error(loginResult.error || 'Login failed');
+      if (this.useSecureTunnel && this.secureTunnel) {
+        // Connect to middleware if not already connected
+        if (!this.secureTunnel.connected) {
+          await this.secureTunnel.connect();
+        }
+        
+        // Request SSO login via secure tunnel
+        loginResult = await this.secureTunnel.requestSSOLogin();
+      } else {
+        // Traditional API-based login
+        // 1. Get challenge
+        const challengeResponse = await fetch(`${this.apiUrl}/api/sso/challenge/${this.walletAddress}`);
+        const { challenge } = await challengeResponse.json();
+        
+        // 2. Sign challenge
+        const signature = await this.signMessage(challenge);
+        
+        // 3. Login with signature
+        const loginResponse = await fetch(`${this.apiUrl}/api/sso/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            walletAddress: this.walletAddress,
+            signature,
+            challenge
+          })
+        });
+        
+        loginResult = await loginResponse.json();
+        
+        if (!loginResponse.ok) {
+          throw new Error(loginResult.error || 'Login failed');
+        }
       }
       
       // Store SSO token
@@ -149,16 +192,24 @@ class SovereignDIDClient {
         await this.login();
       }
       
-      const response = await fetch(`${this.apiUrl}/api/sso/token/${appId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.ssoToken}`
+      let result;
+      
+      if (this.useSecureTunnel && this.secureTunnel && this.secureTunnel.connected) {
+        // Request app token via secure tunnel
+        result = await this.secureTunnel.requestAppToken(appId, this.ssoToken);
+      } else {
+        // Traditional API-based token request
+        const response = await fetch(`${this.apiUrl}/api/sso/token/${appId}`, {
+          headers: {
+            'Authorization': `Bearer ${this.ssoToken}`
+          }
+        });
+        
+        result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to get app token');
         }
-      });
-      
-      const result = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to get app token');
       }
       
       return result;
@@ -431,6 +482,23 @@ class SovereignDIDClient {
       console.error('Error signing message:', error);
       throw error;
     }
+  }
+
+  /**
+   * Load a script dynamically
+   * @param {string} src - Script source URL
+   * @returns {Promise<void>}
+   * @private
+   */
+  async _loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+      document.head.appendChild(script);
+    });
   }
 }
 

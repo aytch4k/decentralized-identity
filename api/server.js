@@ -4,20 +4,44 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const jwt = require('jsonwebtoken');
 const Web3 = require('web3');
+const path = require('path');
 
 // Import our services
 const didManager = require('./did-manager');
 const ssoService = require('./sso-service');
+const TunnelService = require('./secure-tunnel/tunnel-service');
 
 // Initialize Express app
 const app = express();
 const port = process.env.PORT || 4000;
+
+// Initialize Secure Tunnel Service
+const tunnelService = new TunnelService({
+  type: 'middleware',
+  region: process.env.REGION || 'EU',
+  bootstrapList: process.env.BOOTSTRAP_LIST ? process.env.BOOTSTRAP_LIST.split(',') : [],
+  didManager,
+  ssoService
+});
+
+// Start the tunnel service
+(async () => {
+  try {
+    await tunnelService.initialize();
+    console.log('Secure tunnel service started');
+  } catch (error) {
+    console.error('Failed to start secure tunnel service:', error);
+  }
+})();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan('combined'));
+
+// Serve client-side libraries
+app.use('/client', express.static(path.join(__dirname, 'client')));
 
 // JWT authentication middleware
 const authenticateJWT = (req, res, next) => {

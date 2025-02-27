@@ -32,6 +32,12 @@ The system consists of the following components:
    - DiD Manager API for DiD operations
    - SSO Integration Layer for authentication across apps
    - RESTful endpoints for client interactions
+   - Secure Tunnel Service for encrypted point-to-point communication
+
+4. **Transport Layer**:
+   - libp2p for peer-to-peer communication
+   - Lattice-based encryption for post-quantum security
+   - Region-specific peer discovery and routing
 
 4. **Client Layer**:
    - JavaScript libraries for DiD, HE, ZK, and DP operations
@@ -116,6 +122,7 @@ The API server exposes the following endpoints:
 The project includes several client-side libraries:
 
 - `sovereign-did-client.js` - Main client for DiD and SSO operations
+- `secure-tunnel-client.js` - Client for secure point-to-point communication
 - `homomorphic-encryption.js` - Utilities for homomorphic encryption
 - `zk-proofs.js` - Utilities for zero-knowledge proofs
 - `differential-privacy.js` - Utilities for differential privacy
@@ -126,6 +133,15 @@ The project includes several client-side libraries:
 decentralized-identity/
 ├── api/                  # API server
 │   ├── client/           # Client-side libraries and demo
+│   │   ├── sovereign-did-client.js    # DiD client
+│   │   ├── secure-tunnel-client.js    # Secure tunnel client
+│   │   ├── homomorphic-encryption.js  # HE utilities
+│   │   ├── zk-proofs.js               # ZK utilities
+│   │   └── differential-privacy.js    # DP utilities
+│   ├── secure-tunnel/    # Secure tunnel implementation
+│   │   ├── libp2p-node.js             # libp2p node implementation
+│   │   ├── lattice-crypto.js          # Lattice-based cryptography
+│   │   └── tunnel-service.js          # Tunnel service
 │   ├── did-manager.js    # DiD Manager implementation
 │   ├── sso-service.js    # SSO Service implementation
 │   ├── server.js         # API server implementation
@@ -163,6 +179,8 @@ decentralized-identity/
 - Differential privacy techniques are applied to sensitive data
 - All API endpoints require proper authentication
 - Geo-fenced storage ensures data sovereignty compliance
+- Secure point-to-point tunnel using libp2p and lattice-based encryption for post-quantum security
+- End-to-end encrypted communication between wallet and middleware
 
 ## License
 
