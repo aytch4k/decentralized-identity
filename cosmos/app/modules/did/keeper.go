@@ -3,17 +3,22 @@ package did
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Keeper handles state interactions for the DID module.
 type Keeper struct {
 	storeKey sdk.StoreKey
+	cdc      codec.BinaryCodec
 }
 
 // NewKeeper creates a new DID Keeper.
-func NewKeeper(storeKey sdk.StoreKey) Keeper {
-	return Keeper{storeKey: storeKey}
+func NewKeeper(storeKey sdk.StoreKey, cdc codec.BinaryCodec) Keeper {
+	return Keeper{
+		storeKey: storeKey,
+		cdc:      cdc,
+	}
 }
 
 // CreateDID stores a new DID document in the blockchain state.

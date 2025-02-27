@@ -1,6 +1,7 @@
 package did
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/cosmos/cosmos-sdk/client"
