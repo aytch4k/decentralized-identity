@@ -282,12 +282,55 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Add a root route handler
+app.get('/', (req, res) => {
+  res.status(200).send(`
+    <html>
+      <head>
+        <title>Sovereign DID API</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+          h1 { color: #333; }
+          h2 { color: #555; margin-top: 30px; }
+          pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+          .endpoint { margin-bottom: 10px; }
+        </style>
+      </head>
+      <body>
+        <h1>Sovereign Decentralized Identity API</h1>
+        <p>Welcome to the Sovereign DID API server. This API provides endpoints for managing decentralized identities and single sign-on capabilities.</p>
+        
+        <h2>Available Endpoints:</h2>
+        
+        <h3>DID Manager API</h3>
+        <div class="endpoint"><pre>POST /api/did/create</pre> - Create a new DID</div>
+        <div class="endpoint"><pre>GET /api/did/resolve/:did</pre> - Resolve a DID to its DID Document</div>
+        <div class="endpoint"><pre>PUT /api/did/update</pre> - Update a DID Document</div>
+        <div class="endpoint"><pre>DELETE /api/did/deactivate/:walletAddress</pre> - Deactivate a DID</div>
+        <div class="endpoint"><pre>POST /api/did/verify</pre> - Verify a DID proof</div>
+        <div class="endpoint"><pre>POST /api/did/credentials/add</pre> - Add app credentials to a DID Document</div>
+        <div class="endpoint"><pre>GET /api/did/credentials/:did/:appId</pre> - Get app credentials</div>
+        <div class="endpoint"><pre>POST /api/did/export</pre> - Authorize export of DID data</div>
+        
+        <h3>SSO Integration Layer API</h3>
+        <div class="endpoint"><pre>GET /api/sso/challenge/:walletAddress</pre> - Generate a challenge for wallet authentication</div>
+        <div class="endpoint"><pre>POST /api/sso/login</pre> - Authenticate with wallet and get SSO token</div>
+        <div class="endpoint"><pre>GET /api/sso/token/:appId</pre> - Get app-specific authentication token</div>
+        <div class="endpoint"><pre>POST /api/sso/logout</pre> - Invalidate SSO session</div>
+        
+        <h3>Health Check</h3>
+        <div class="endpoint"><pre>GET /health</pre> - Check API health status</div>
+      </body>
+    </html>
+  `);
+});
+
 // Start the server
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`);
   console.log('API Documentation:');
-  console.log('- DID API: http://localhost:${port}/api/did/...');
-  console.log('- SSO API: http://localhost:${port}/api/sso/...');
+  console.log(`- DID API: http://localhost:${port}/api/did/...`);
+  console.log(`- SSO API: http://localhost:${port}/api/sso/...`);
 });
 
 module.exports = app; // For testing

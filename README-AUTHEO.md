@@ -91,6 +91,7 @@ Common issues:
 - Missing SovereignIdentityManager.json file: This file is needed by the API service and should be created during contract deployment
 - Unable to connect to Autheo testnet RPC: Verify the RPC URL is correct and accessible
 - libp2p module errors: If you encounter errors with libp2p, make sure you're using version 0.30.10 which is compatible with CommonJS
+- DHT constructor errors: The "DHT is not a constructor" error has been fixed by disabling the DHT module in the libp2p configuration
 
 ### Build Warnings
 

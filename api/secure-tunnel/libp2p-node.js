@@ -68,7 +68,8 @@ class SecureTunnelNode {
           transport: [TCP, WebSockets],
           connEncryption: [NOISE],
           streamMuxer: [MPLEX],
-          dht: KadDHT,
+          // Remove DHT to fix constructor error
+          // dht: KadDHT,
           peerDiscovery: [Bootstrap]
         },
         config: {
@@ -76,13 +77,14 @@ class SecureTunnelNode {
             bootstrap: {
               list: this.bootstrapList
             }
-          },
-          dht: {
-            enabled: true,
-            randomWalk: {
-              enabled: true
-            }
           }
+          // Remove DHT config to fix constructor error
+          // dht: {
+          //   enabled: true,
+          //   randomWalk: {
+          //     enabled: true
+          //   }
+          // }
         }
       });
 
