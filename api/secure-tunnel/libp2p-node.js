@@ -6,6 +6,7 @@
  * encryption for post-quantum security.
  */
 
+// Use the older version of libp2p which is CommonJS compatible
 const Libp2p = require('libp2p');
 const TCP = require('libp2p-tcp');
 const WebSockets = require('libp2p-websockets');

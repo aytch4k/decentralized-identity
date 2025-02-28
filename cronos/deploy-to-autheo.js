@@ -71,6 +71,18 @@ async function deployContracts() {
     );
     
     console.log('Deployment information saved to deployment-info.json');
+    
+    // Save contract ABI for API service
+    const sovereignABI = {
+      abi: SovereignIdentityManagerArtifact.abi
+    };
+    
+    fs.writeFileSync(
+      path.join(__dirname, '../api/SovereignIdentityManager.json'),
+      JSON.stringify(sovereignABI, null, 2)
+    );
+    
+    console.log('Contract ABI saved to api/SovereignIdentityManager.json');
     console.log('Deployment completed successfully!');
     
     return {

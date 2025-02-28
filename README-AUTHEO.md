@@ -20,9 +20,19 @@ This guide explains how to set up and run the Decentralized Identity system on t
 CRONOS_RPC=https://testnet-rpc2.autheo.com  # Replace with actual Autheo testnet RPC URL
 COSMOS_API=https://testnet-rpc2.autheo.com/api  # Replace with actual Autheo testnet API URL
 
-# Update with your wallet information
-PRIVATE_KEY=0xYourPrivateKey  # Your Autheo testnet wallet private key
-WALLET_ADDRESS=0xYourWalletAddress  # Your Autheo testnet wallet address
+# IMPORTANT: You must update these with valid wallet information
+# The default values are for development only and won't work on Autheo testnet
+PRIVATE_KEY=0xYourPrivateKey  # Must be a valid Ethereum private key (64 hex chars with 0x prefix)
+WALLET_ADDRESS=0xYourWalletAddress  # Must be a valid Ethereum address (40 hex chars with 0x prefix)
+
+# After contract deployment, this will be automatically updated
+CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3  # Will be updated after deployment
+```
+
+You can generate a wallet using the provided script:
+
+```bash
+./generate-wallet.js --update-env
 ```
 
 ### 2. Build the Docker Images
@@ -42,6 +52,7 @@ This script will:
 - Deploy the DIDRegistry and SovereignIdentityManager contracts to Autheo testnet
 - Update the CONTRACT_ADDRESS in the .env file
 - Create a deployment-info.json file with deployment details
+- Save the contract ABI to api/SovereignIdentityManager.json for the API service
 
 ### 4. Start the System
 
@@ -74,9 +85,23 @@ docker-compose logs api
 ```
 
 Common issues:
-- Invalid private key format
-- Unable to connect to Autheo testnet RPC
-- Contract address not set correctly
+- Invalid private key format: Make sure your private key is a valid Ethereum private key (64 hex characters with 0x prefix)
+- Invalid wallet address format: Make sure your wallet address is a valid Ethereum address (40 hex characters with 0x prefix)
+- Invalid contract address: The placeholder "0xYourContractAddress" will cause an error; it must be a valid Ethereum address
+- Missing SovereignIdentityManager.json file: This file is needed by the API service and should be created during contract deployment
+- Unable to connect to Autheo testnet RPC: Verify the RPC URL is correct and accessible
+- libp2p module errors: If you encounter errors with libp2p, make sure you're using version 0.30.10 which is compatible with CommonJS
+
+### Build Warnings
+
+When building the API service, you may see numerous deprecation warnings related to Node.js modules. These warnings are expected and can be safely ignored:
+
+```
+(node:xxx) [DEP0128] DeprecationWarning: Invalid 'main' field in '...' package.json
+(node:xxx) [DEP0148] DeprecationWarning: Use of deprecated folder mapping './lib' in the 'exports' field
+```
+
+These warnings are due to older dependencies used by libp2p and other modules. They don't affect the functionality of the system but will be addressed in future updates.
 
 ### Contract Deployment Issues
 
